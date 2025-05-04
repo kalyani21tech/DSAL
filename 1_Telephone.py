@@ -1,87 +1,87 @@
-class HashTable:
-    def __init__(self, size, method="separate_chaining"):
-        self.size = size
-        self.method = method
-        if method == "separate_chaining":
-            self.table = [[] for _ in range(size)]  # List of lists for separate chaining
-        elif method == "linear_probing":
-            self.table = [None] * size  # Flat list for linear probing
+size = 10
+client_list = [None] * size
 
-    def hash_function(self, key):
-        """Simple hash function: sum of ASCII values of characters mod table size."""
-        return sum(ord(c) for c in key) % self.size
+def add_client():
+    client_id = int(input("Client ID: "))
+    name = input("Client Name: ")
+    telephone = input("Client Telephone Number: ")
+    client_details = [client_id, name, telephone]
 
-    def insert(self, key, value):
-        """Insert a key-value pair into the hash table."""
-        index = self.hash_function(key)
-        if self.method == "separate_chaining":
-            # Append to the list at the hashed index
-            self.table[index].append((key, value))
-        elif self.method == "linear_probing":
-            # Linear probing to handle collisions
-            original_index = index
-            while self.table[index] is not None:
-                index = (index + 1) % self.size
-                if index == original_index:
-                    print("Hash table is full!")
-                    return
-            self.table[index] = (key, value)
+    index = client_id % size
+    if client_list[index] is None:
+        client_list[index] = client_details
+        print("Client details added at index", index, ":", client_details)
+    else:
+        found = False
+        for j in range(1, int((size - 1) / 2)):
+            t = (index + j * j) % size
+            if client_list[t] is None:
+                client_list[t] = client_details
+                print("Client details added at index", t, ":", client_details)
+                found = True
+                break
+        if not found:
+            print("Hash table is full, unable to add client.")
 
-    def search(self, key):
-        """Search for a key in the hash table and return its value and comparison count."""
-        index = self.hash_function(key)
-        comparisons = 0
+    print("\nClient List:", client_list)
 
-        if self.method == "separate_chaining":
-            for k, v in self.table[index]:
-                comparisons += 1
-                if k == key:
-                    return v, comparisons
-        elif self.method == "linear_probing":
-            start_index = index
-            while self.table[index] is not None:
-                comparisons += 1
-                if self.table[index][0] == key:
-                    return self.table[index][1], comparisons
-                index = (index + 1) % self.size
-                if index == start_index:
-                    break
+def search_client():
+    client_id = int(input("Enter Client ID to search: "))
+    index = client_id % size
+    cnt = 0
+    for i in range(size):
+        if client_list[index] is not None:
+            cnt += 1
+            if client_list[index][0] == client_id:
+                print("Client found at index", index, ":", client_list[index])
+                print("\nNumber of comparisons required to search Client ID %d: %d" % (client_id, cnt))
+                break
+        index = (index + 1) % size
+    else:
+        print("Client with ID %d not found." % client_id)
+        print("\nNumber of comparisons required: %d" % cnt)
 
-        return None, comparisons
+def quadratic_probing():
+    print("\n----- Quadratic Probing -----")
+    client_id = int(input("Enter Client ID: "))
+    name = input("Enter Client Name: ")
+    telephone = input("Enter Client Telephone Number: ")
+    client_details = [client_id, name, telephone]
 
-# Example usage
-def main():
-    size = 10  # Size of hash table
-    telephone_book = [
-        ("Alice", "12345"),
-        ("Bob", "67890"),
-        ("Charlie", "54321"),
-        ("David", "98765"),
-        ("Eve", "56789"),
-    ]
+    index = client_id % size
+    found = False
+    for j in range(1, int((size - 1) / 2)):
+        t = (index + j * j) % size
+        if client_list[t] is None:
+            client_list[t] = client_details
+            print("Client details added at index", t, ":", client_details)
+            found = True
+            break
+    if not found:
+        print("Hash table is full, unable to add client.")
 
-    # Separate Chaining
-    ht_separate = HashTable(size, method="separate_chaining")
-    for name, number in telephone_book:
-        ht_separate.insert(name, number)
+    print("\nClient List:", client_list)
 
-    # Linear Probing
-    ht_linear = HashTable(size, method="linear_probing")
-    for name, number in telephone_book:
-        ht_linear.insert(name, number)
+def Main():
+    while True:
+        print("\n----- Client Management System -----")
+        print("1. Add Client")
+        print("2. Search Client")
+        print("3. Quadratic Probing")
+        print("4. Exit")
 
-    # Search for keys and compare the number of comparisons
-    search_keys = ["Alice", "Charlie", "Eve"]
+        choice = int(input("Enter your choice: "))
 
-    print("Searching for keys using Separate Chaining:")
-    for key in search_keys:
-        result, comparisons = ht_separate.search(key)
-        print(f"Key: {key}, Value: {result}, Comparisons: {comparisons}")
+        if choice == 1:
+            add_client()
+        elif choice == 2:
+            search_client()
+        elif choice == 3:
+            quadratic_probing()
+        elif choice == 4:
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
-    print("\nSearching for keys using Linear Probing:")
-    for key in search_keys:
-        result, comparisons = ht_linear.search(key)
-        print(f"Key: {key}, Value: {result}, Comparisons: {comparisons}")
-
-if __name__ == "__main__":
-    main()
+Main()
